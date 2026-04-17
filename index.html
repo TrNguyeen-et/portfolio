@@ -203,9 +203,19 @@
     border: 4px solid var(--surface);
     box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   }
+  
   .avatar-initials {
     font-family: 'DM Serif Display', serif; font-size: 3rem; color: var(--ink);
   }
+
+
+  .avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    border-radius: 50%; 
+  }
+  /* ------------------------------------------ */
 
   /* --- SECTIONS COMMON --- */
   section { max-width: 900px; margin: 0 auto; padding: 4rem 1.5rem; }
@@ -459,7 +469,7 @@
   <div class="avatar-wrap fade-in-up delay-2">
     <div class="avatar-bg"></div>
     <div class="avatar-inner">
-      <span class="avatar-initials">VTN</span>
+      <img src="me.jpg" alt="Nguyen Avatar" class="avatar-img">
     </div>
   </div>
 </div>
