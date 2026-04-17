@@ -1,486 +1,953 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vương Trường Nguyên — Security & AI Engineer</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  /* --- RESET & VARIABLES --- */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  
   :root {
-    --ink: #1a1a1a; --ink2: #444; --ink3: #888;
-    --surface: #fafaf8; --card: #ffffff; --border: #e8e6e0;
-    --accent: #2a5c8f; --accent2: #1a3d5c;
-    --tag-bg: #eef3f8; --tag-text: #2a5c8f;
-    --green: #1d7a4a; --green-bg: #edf7f2;
+    /* Light Mode (Default) */
+    --ink: #0f1115; --ink2: #4a5568; --ink3: #718096;
+    --surface: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+    --accent: #2563eb; --accent-soft: #eff6ff; --accent-glow: rgba(37,99,235,0.15);
+    --green: #059669; --green-bg: #d1fae5;
+    --bg-dot: #e2e8f0;
   }
-  body { font-family: 'Outfit', sans-serif; background: var(--surface); color: var(--ink); line-height: 1.6; font-size: 15px; }
 
+  body.dark-mode {
+    /* Dark Mode */
+    --ink: #f1f5f9; --ink2: #cbd5e1; --ink3: #94a3b8;
+    --surface: #0f172a; --card: #1e293b; --border: #334155;
+    --accent: #60a5fa; --accent-soft: rgba(96,165,250,0.15); --accent-glow: rgba(96,165,250,0.2);
+    --green: #34d399; --green-bg: rgba(52,211,153,0.15);
+    --bg-dot: #1e293b;
+  }
+
+  /* --- GLOBAL STYLES --- */
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--surface);
+    color: var(--ink);
+    line-height: 1.6;
+    font-size: 15px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    /* Tech background pattern */
+    background-image: radial-gradient(var(--bg-dot) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  a { text-decoration: none; color: inherit; transition: all 0.2s ease; }
+  ul { list-style: none; }
+  button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+
+  /* Animation classes */
+  .fade-in-up { opacity: 0; transform: translateY(20px); animation: fadeInUp 0.6s forwards; }
+  @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+
+  /* --- NAVIGATION --- */
   nav {
     position: sticky; top: 0; z-index: 100;
-    background: rgba(250,250,248,0.93); backdrop-filter: blur(12px);
+    background: rgba(248,250,252,0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border);
-    padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 56px;
+    padding: 0 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
-  .nav-logo { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: var(--accent); letter-spacing: 0.05em; }
-  .nav-links { display: flex; gap: 1.25rem; }
-  .nav-links a { font-size: 13px; color: var(--ink3); text-decoration: none; transition: color 0.2s; }
-  .nav-links a:hover { color: var(--ink); }
+  body.dark-mode nav {
+    background: rgba(15,23,42,0.85);
+  }
 
-  .hero { max-width: 860px; margin: 0 auto; padding: 5rem 2rem 4rem; display: grid; grid-template-columns: 1fr auto; gap: 3rem; align-items: center; }
-  .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--tag-bg); color: var(--tag-text); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; padding: 4px 10px; border-radius: 20px; font-family: 'DM Mono', monospace; margin-bottom: 1rem; }
-  .hero-badge::before { content: ''; width: 6px; height: 6px; background: var(--green); border-radius: 50%; }
-  h1 { font-family: 'DM Serif Display', serif; font-size: clamp(2.2rem, 5vw, 3.2rem); line-height: 1.1; color: var(--ink); margin-bottom: 0.5rem; }
-  .hero-title-sub { font-size: 1rem; color: var(--ink3); font-weight: 300; margin-bottom: 1.25rem; }
-  .hero-desc { font-size: 0.92rem; color: var(--ink2); line-height: 1.75; max-width: 480px; margin-bottom: 1.5rem; }
-  .hero-links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 6px; font-size: 13px; font-weight: 500; text-decoration: none; cursor: pointer; transition: all 0.2s; }
-  .btn-primary { background: var(--accent); color: #fff; border: 1px solid var(--accent); }
-  .btn-primary:hover { background: var(--accent2); }
-  .btn-ghost { background: transparent; color: var(--ink2); border: 1px solid var(--border); }
-  .btn-ghost:hover { border-color: var(--ink3); color: var(--ink); }
-  .avatar-wrap { width: 120px; height: 120px; flex-shrink: 0; border-radius: 50%; border: 3px solid var(--border); overflow: hidden; background: var(--tag-bg); display: flex; align-items: center; justify-content: center; }
-  .avatar-initials { font-family: 'DM Serif Display', serif; font-size: 2.4rem; color: var(--accent); }
+  .nav-left { display: flex; align-items: center; gap: 2rem; }
+  
+  .nav-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    background: var(--ink);
+    color: var(--surface); /* Inverted for logo */
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
 
-  section { max-width: 860px; margin: 0 auto; padding: 3rem 2rem; }
-  .section-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: var(--ink3); text-transform: uppercase; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
-  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-  hr.divider { border: none; border-top: 1px solid var(--border); max-width: 860px; margin: 0 auto; }
+  .nav-links { display: flex; gap: 2rem; }
+  .nav-links a {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink2);
+    position: relative;
+  }
+  .nav-links a:hover, .nav-links a.active { color: var(--accent); }
+  .nav-links a::after {
+    content: ''; position: absolute; width: 0; height: 2px;
+    bottom: -4px; left: 0; background-color: var(--accent);
+    transition: width 0.3s;
+  }
+  .nav-links a:hover::after { width: 100%; }
 
-  /* SKILLS */
-  .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.875rem; }
-  .skill-cat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.1rem; }
-  .skill-cat-title { font-size: 11px; font-weight: 500; color: var(--ink3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.65rem; font-family: 'DM Mono', monospace; }
-  .skill-tags { display: flex; flex-wrap: wrap; gap: 5px; }
-  .tag { font-size: 11.5px; padding: 3px 9px; border-radius: 20px; font-weight: 500; }
-  .tag.sec { background: #fef0ee; color: #8f3a2a; }
-  .tag.prog { background: #f0f0ed; color: #3a3a36; }
-  .tag.ai { background: #f0edf7; color: #5a3d8f; }
-  .tag.net { background: #edf5f0; color: #1d5a3a; }
-  .tag.sys { background: var(--tag-bg); color: var(--tag-text); }
-  .tag.java { background: #fff4e6; color: #8f5a1a; }
+  .nav-controls { display: flex; align-items: center; gap: 10px; }
+  
+  .icon-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--ink2);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+    font-weight: 600;
+  }
+  .icon-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
 
-  /* PROJECTS */
-  .projects-grid { display: grid; gap: 0.875rem; }
-  .proj { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.1rem 1.35rem; display: grid; grid-template-columns: 1fr auto; gap: 0.875rem; align-items: start; transition: border-color 0.2s; }
-  .proj:hover { border-color: var(--accent); }
-  .proj-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.3rem; }
-  .proj-desc { font-size: 0.845rem; color: var(--ink2); line-height: 1.6; margin-bottom: 0.65rem; }
-  .proj-stack { display: flex; flex-wrap: wrap; gap: 5px; }
-  .proj-year { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink3); white-space: nowrap; }
+  /* --- HERO SECTION --- */
+  .hero {
+    max-width: 900px; margin: 0 auto;
+    padding: 6rem 1.5rem 4rem;
+    display: grid; grid-template-columns: 1fr auto; gap: 3rem; align-items: center;
+  }
+  .hero-content { z-index: 1; }
+  
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--green-bg); color: var(--green);
+    font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+    padding: 6px 12px; border-radius: 50px;
+    font-family: 'DM Mono', monospace; margin-bottom: 1.5rem;
+    border: 1px solid rgba(5,150,105,0.2);
+  }
+  .hero-badge::before {
+    content: ''; width: 7px; height: 7px; background: var(--green);
+    border-radius: 50%; box-shadow: 0 0 0 2px rgba(5,150,105,0.2);
+  }
 
-  /* CERTS */
-  .cert-list { display: grid; gap: 0.65rem; }
-  .cert-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0.875rem 1.1rem; display: flex; align-items: center; gap: 0.875rem; }
-  .cert-icon { width: 38px; height: 38px; border-radius: 8px; background: var(--tag-bg); display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
-  .cert-name { font-size: 0.855rem; font-weight: 500; }
-  .cert-sub { font-size: 0.78rem; color: var(--ink3); }
-  .cert-status { margin-left: auto; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; background: #fff8ed; color: #a06000; white-space: nowrap; }
-  .cert-status.done { background: var(--green-bg); color: var(--green); }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+  
+  .typing-text {
+    color: var(--accent);
+    border-right: 2px solid var(--accent);
+    padding-right: 4px;
+    animation: blink 0.75s step-end infinite;
+  }
+  @keyframes blink { 50% { border-color: transparent; } }
 
-  /* CONTACT */
-  .contact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 0.875rem; }
-  .contact-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 0.875rem 1.1rem; text-decoration: none; color: inherit; display: flex; align-items: center; gap: 0.75rem; transition: border-color 0.2s; }
-  .contact-item:hover { border-color: var(--accent); }
-  .contact-icon { font-size: 15px; }
-  .contact-label { font-size: 11px; color: var(--ink3); }
-  .contact-val { font-size: 0.845rem; font-weight: 500; }
+  .hero-title-sub {
+    font-size: 1.1rem; color: var(--ink2); font-weight: 400;
+    margin-bottom: 1.5rem; max-width: 540px;
+  }
 
-  /* CHATBOT */
-  #chatbot { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; }
-  .chat-bubble-btn { width: 52px; height: 52px; border-radius: 50%; background: var(--accent); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 20px rgba(42,92,143,0.35); transition: transform 0.2s; color: #fff; font-size: 22px; }
-  .chat-bubble-btn:hover { transform: scale(1.07); }
-  .chat-window { display: none; position: absolute; bottom: 64px; right: 0; width: 320px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 12px 40px rgba(0,0,0,0.12); flex-direction: column; }
-  .chat-window.open { display: flex; }
-  .chat-header { background: var(--accent); color: #fff; padding: 0.875rem 1rem; display: flex; align-items: center; gap: 0.6rem; }
-  .chat-header-dot { width: 8px; height: 8px; background: #7fefa0; border-radius: 50%; }
-  .chat-header-name { font-size: 0.875rem; font-weight: 500; }
-  .chat-header-sub { font-size: 11px; opacity: 0.75; }
-  .chat-messages { height: 240px; overflow-y: auto; padding: 0.875rem; display: flex; flex-direction: column; gap: 0.6rem; }
-  .chat-messages::-webkit-scrollbar { width: 4px; }
-  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-  .msg { max-width: 85%; padding: 8px 12px; border-radius: 10px; font-size: 13px; line-height: 1.5; }
-  .msg.bot { background: var(--tag-bg); color: var(--ink); align-self: flex-start; border-bottom-left-radius: 3px; }
-  .msg.user { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 3px; }
-  .quick-chips { display: flex; flex-wrap: wrap; gap: 5px; padding: 0 0.875rem 0.6rem; }
-  .chip { font-size: 11px; padding: 4px 10px; border-radius: 20px; background: var(--tag-bg); color: var(--tag-text); border: none; cursor: pointer; font-family: 'Outfit', sans-serif; transition: background 0.15s; }
-  .chip:hover { background: #d8e8f5; }
-  .chat-input-row { display: flex; gap: 0.5rem; padding: 0.75rem; border-top: 1px solid var(--border); }
-  .chat-input { flex: 1; padding: 7px 12px; border: 1px solid var(--border); border-radius: 20px; font-size: 13px; outline: none; font-family: 'Outfit', sans-serif; background: var(--surface); color: var(--ink); }
+  .hero-links { display: flex; gap: 1rem; margin-top: 2rem; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--ink); color: var(--surface); border: 1px solid var(--ink);
+    box-shadow: var(--shadow-md);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0.9; }
+  
+  .btn-ghost {
+    background: var(--card); color: var(--ink); border: 1px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--ink); background: var(--surface); }
+
+  /* Avatar Tech Style */
+  .avatar-wrap {
+    width: 140px; height: 140px; flex-shrink: 0;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .avatar-bg {
+    position: absolute; width: 100%; height: 100%;
+    border-radius: 50%;
+    background: conic-gradient(from 180deg at 50% 50%, var(--accent) 0deg, #a855f7 180deg, var(--accent) 360deg);
+    animation: spin 10s linear infinite;
+    opacity: 0.2;
+  }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  
+  .avatar-inner {
+    width: 128px; height: 128px;
+    background: var(--card);
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    border: 4px solid var(--surface);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+  .avatar-initials {
+    font-family: 'DM Serif Display', serif; font-size: 3rem; color: var(--ink);
+  }
+
+  /* --- SECTIONS COMMON --- */
+  section { max-width: 900px; margin: 0 auto; padding: 4rem 1.5rem; }
+  
+  .section-header {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .section-label {
+    font-family: 'DM Mono', monospace; font-size: 12px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--ink3); font-weight: 600;
+  }
+  .section-line { flex: 1; height: 1px; background: var(--border); }
+
+  /* --- SKILLS GRID --- */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .skill-cat {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.25rem;
+    transition: transform 0.2s, box-shadow 0.2s, background-color 0.3s;
+  }
+  .skill-cat:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-color: var(--accent-soft); }
+  .skill-cat-title {
+    font-size: 11px; font-weight: 700; color: var(--ink3);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 0.75rem; font-family: 'DM Mono', monospace;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .skill-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag {
+    font-size: 12px; padding: 4px 10px; border-radius: 6px;
+    font-weight: 500; font-family: 'DM Mono', monospace;
+    background: var(--surface); color: var(--ink2); border: 1px solid transparent;
+  }
+  /* Tag Colors (Dark mode compatible) */
+  .tag.sec { background: rgba(254, 242, 242, 0.8); color: #991b1b; }
+  .tag.prog { background: rgba(245, 245, 244, 0.8); color: #44403c; }
+  .tag.ai { background: rgba(250, 245, 255, 0.8); color: #86198f; }
+  .tag.net { background: rgba(240, 253, 244, 0.8); color: #166534; }
+  .tag.sys { background: rgba(239, 246, 255, 0.8); color: #1e40af; }
+  .tag.java { background: rgba(255, 247, 237, 0.8); color: #9a3412; }
+
+  body.dark-mode .tag.sec { background: rgba(127, 29, 29, 0.3); color: #fca5a5; }
+  body.dark-mode .tag.prog { background: rgba(120, 113, 108, 0.3); color: #e7e5e4; }
+  body.dark-mode .tag.ai { background: rgba(88, 28, 135, 0.3); color: #e9d5ff; }
+  body.dark-mode .tag.net { background: rgba(21, 128, 61, 0.3); color: #bbf7d0; }
+  body.dark-mode .tag.sys { background: rgba(30, 64, 175, 0.3); color: #bfdbfe; }
+  body.dark-mode .tag.java { background: rgba(124, 45, 18, 0.3); color: #fed7aa; }
+
+
+  /* --- PROJECTS --- */
+  .projects-grid { display: grid; gap: 1.25rem; }
+  .proj {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.5rem;
+    display: grid; grid-template-columns: 1fr auto; gap: 1.5rem; align-items: start;
+    transition: all 0.2s ease;
+    position: relative; overflow: hidden;
+  }
+  .proj:hover {
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  .proj::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+    background: var(--accent); opacity: 0; transition: opacity 0.2s;
+  }
+  .proj:hover::before { opacity: 1; }
+
+  .proj-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--ink); }
+  .proj-desc { font-size: 0.9rem; color: var(--ink2); line-height: 1.7; margin-bottom: 1rem; }
+  .proj-meta { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+  .proj-stack { display: flex; flex-wrap: wrap; gap: 6px; }
+  .proj-year {
+    font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink3);
+    background: var(--surface); padding: 4px 8px; border-radius: 6px;
+  }
+  .proj-links { margin-top: 0.8rem; display: flex; gap: 10px; }
+  .proj-link {
+    font-size: 12px; font-weight: 600; color: var(--accent);
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .proj-link:hover { text-decoration: underline; }
+
+  /* --- CERTS --- */
+  .cert-list { display: grid; gap: 0.75rem; }
+  .cert-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: 1rem;
+    transition: transform 0.2s;
+  }
+  .cert-card:hover { transform: translateX(5px); border-color: var(--ink3); }
+  .cert-icon { font-size: 1.5rem; background: var(--surface); padding: 8px; border-radius: 8px; }
+  .cert-info { flex: 1; }
+  .cert-name { font-size: 0.95rem; font-weight: 600; margin-bottom: 2px; }
+  .cert-sub { font-size: 0.8rem; color: var(--ink3); font-family: 'DM Mono', monospace; }
+  .cert-badge {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 10px;
+    border-radius: 20px; letter-spacing: 0.05em;
+  }
+  .status-progress { background: rgba(255, 247, 237, 0.8); color: #c2410c; }
+  .status-planned { background: rgba(241, 245, 249, 0.8); color: #475569; }
+
+  body.dark-mode .status-progress { background: rgba(124, 45, 18, 0.3); color: #fdba74; }
+  body.dark-mode .status-planned { background: rgba(51, 65, 85, 0.5); color: #cbd5e1; }
+
+
+  /* --- KNOWLEDGE --- */
+  .knowledge-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+  .k-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 1.25rem; display: flex; flex-direction: column;
+  }
+  .k-title { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--ink3); text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 700; }
+  .k-desc { font-size: 0.9rem; color: var(--ink2); line-height: 1.6; }
+
+  /* --- CONTACT --- */
+  .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+  .contact-item {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 1rem; display: flex; align-items: center; gap: 1rem;
+    transition: all 0.2s;
+  }
+  .contact-item:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .c-icon {
+    width: 40px; height: 40px; background: var(--surface); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--ink);
+  }
+  .c-data h4 { font-size: 11px; color: var(--ink3); font-weight: 500; margin-bottom: 2px; }
+  .c-data p { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+  /* --- CHATBOT --- */
+  #chatbot { position: fixed; bottom: 2rem; right: 2rem; z-index: 1000; font-family: 'Outfit', sans-serif; }
+  
+  .chat-toggle {
+    width: 60px; height: 60px; border-radius: 50%;
+    background: var(--ink); color: var(--surface); border: none;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; transition: transform 0.2s;
+    position: relative;
+  }
+  .chat-toggle:hover { transform: scale(1.05); }
+  .chat-toggle::after {
+    content: ''; position: absolute; top: 2px; right: 2px; width: 12px; height: 12px;
+    background: #22c55e; border-radius: 50%; border: 2px solid var(--surface);
+  }
+
+  .chat-box {
+    position: absolute; bottom: 80px; right: 0;
+    width: 350px; height: 500px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+    display: none; flex-direction: column; overflow: hidden;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .chat-box.active { display: flex; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .chat-head {
+    background: var(--ink); color: var(--surface); padding: 1rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .chat-avatar { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .chat-info h3 { font-size: 14px; font-weight: 600; }
+  .chat-info span { font-size: 11px; color: rgba(255,255,255,0.7); }
+
+  .chat-body { flex: 1; padding: 1rem; overflow-y: auto; background: var(--surface); display: flex; flex-direction: column; gap: 10px; }
+  .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; }
+  .msg.bot { background: var(--border); color: var(--ink); align-self: flex-start; border-bottom-left-radius: 2px; }
+  .msg.user { background: var(--ink); color: var(--surface); align-self: flex-end; border-bottom-right-radius: 2px; }
+
+  .chat-actions { padding: 10px 1rem; border-top: 1px solid var(--border); display: flex; gap: 8px; background: var(--card); }
+  .chip { font-size: 11px; padding: 5px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 15px; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+  .chip:hover { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+
+  .chat-input-area { padding: 10px; border-top: 1px solid var(--border); display: flex; gap: 8px; background: var(--card); }
+  .chat-input { flex: 1; border: 1px solid var(--border); border-radius: 20px; padding: 8px 14px; font-size: 13px; outline: none; font-family: inherit; background: var(--surface); color: var(--ink); }
   .chat-input:focus { border-color: var(--accent); }
-  .chat-send { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; color: #fff; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
-  .chat-send:hover { background: var(--accent2); }
+  .chat-send { width: 36px; height: 36px; background: var(--accent); border: none; border-radius: 50%; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+  .chat-send:hover { background: var(--ink); }
 
-  @media (max-width: 600px) {
-    .hero { grid-template-columns: 1fr; }
-    .avatar-wrap { display: none; }
+  /* --- FOOTER --- */
+  footer { text-align: center; padding: 2rem; color: var(--ink3); font-size: 13px; font-family: 'DM Mono', monospace; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+  /* --- RESPONSIVE --- */
+  @media (max-width: 768px) {
     nav { padding: 0 1rem; }
-    .nav-links { gap: 0.875rem; }
+    .nav-links { display: none; } 
+    .hero { grid-template-columns: 1fr; text-align: center; padding-top: 4rem; }
+    .hero-content { order: 2; }
+    .avatar-wrap { order: 1; margin: 0 auto; }
+    .hero-links { justify-content: center; }
+    .proj { grid-template-columns: 1fr; }
+    .proj-year { text-align: right; }
+    #chatbot { bottom: 1rem; right: 1rem; }
+    .chat-box { width: 300px; right: -10px; }
+    .nav-left { gap: 1rem; }
+    .icon-btn span { display: none; } /* Hide text on small screens for lang button, keep icon */
   }
 </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
-  <span class="nav-logo">VTN.dev</span>
-  <div class="nav-links">
-    <a href="#skills">Skills</a>
-    <a href="#projects">Projects</a>
-    <a href="#certs">Certs</a>
-    <a href="#contact">Contact</a>
+  <div class="nav-left">
+    <span class="nav-logo">VTN.dev</span>
+    <div class="nav-links">
+      <a href="#skills" data-i18n="nav_skills">Skills</a>
+      <a href="#projects" data-i18n="nav_projects">Projects</a>
+      <a href="#knowledge" data-i18n="nav_knowledge">Knowledge</a>
+      <a href="#certs" data-i18n="nav_certs">Certs</a>
+      <a href="#contact" data-i18n="nav_contact">Contact</a>
+    </div>
+  </div>
+  
+  <div class="nav-controls">
+    <!-- Language Toggle -->
+    <button class="icon-btn" onclick="toggleLanguage()" id="langBtn">
+      <span id="langIcon">🇺🇸</span> <span id="langText">EN</span>
+    </button>
+    <!-- Theme Toggle -->
+    <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">
+      <span id="themeIcon">🌙</span>
+    </button>
   </div>
 </nav>
 
+<!-- HERO -->
 <div class="hero">
-  <div>
-    <div class="hero-badge">Available for opportunities</div>
-    <h1>Vương Trường Nguyên</h1>
-    <p class="hero-title-sub">Pentester · AI Engineer · Security Researcher</p>
-    <p class="hero-desc">
-      Sinh viên An toàn thông tin tại PTIT (TP.HCM), định hướng Penetration Testing và ứng dụng AI trong Cybersecurity. 
-      Có nền tảng vững về hệ thống, mạng máy tính, lập trình và machine learning — 
-      hướng đến xây dựng các công cụ bảo mật thông minh kết hợp AI.
+  <div class="hero-content fade-in-up">
+    <div class="hero-badge" data-i18n="hero_badge">Available for Internship/Fresher</div>
+    <h1 data-i18n="hero_greeting">Hi, I'm <span style="color: var(--accent);">Nguyên</span>.<br>
+      <span class="typing-text" id="typewriter"></span>
+    </h1>
+    <p class="hero-title-sub" data-i18n="hero_desc">
+      Information Security Student at PTIT (HCM). I combine <strong>Penetration Testing</strong> with <strong>Artificial Intelligence</strong> to build smart and efficient security solutions.
     </p>
     <div class="hero-links">
-      <a href="https://github.com/TrNguyeen-et" target="_blank" class="btn btn-primary">GitHub ↗</a>
-      <a href="mailto:egoisticuss@gmail.com" class="btn btn-ghost">Email me</a>
+      <a href="https://github.com/TrNguyeen-et" target="_blank" class="btn btn-primary" data-i18n="btn_github">GitHub Profile ↗</a>
+      <a href="#contact" class="btn btn-ghost" data-i18n="btn_contact">Contact Me</a>
     </div>
   </div>
-  <div class="avatar-wrap"><span class="avatar-initials">VTN</span></div>
+  <div class="avatar-wrap fade-in-up delay-2">
+    <div class="avatar-bg"></div>
+    <div class="avatar-inner">
+      <span class="avatar-initials">VTN</span>
+    </div>
+  </div>
 </div>
-
-<hr class="divider">
 
 <!-- SKILLS -->
 <section id="skills">
-  <div class="section-label">Skills &amp; Tools</div>
+  <div class="section-header">
+    <span class="section-label" data-i18n="sec_skills">Technical Arsenal</span>
+    <div class="section-line"></div>
+  </div>
   <div class="skills-grid">
-
     <div class="skill-cat">
-      <div class="skill-cat-title">Penetration Testing</div>
+      <div class="skill-cat-title">🛡️ Penetration Testing</div>
       <div class="skill-tags">
         <span class="tag sec">Kali Linux</span>
-        <span class="tag sec">Burp Suite</span>
+        <span class="tag sec">Burp Suite Pro</span>
         <span class="tag sec">Metasploit</span>
         <span class="tag sec">Nmap</span>
         <span class="tag sec">Wireshark</span>
         <span class="tag sec">OWASP Top 10</span>
       </div>
     </div>
-
     <div class="skill-cat">
-      <div class="skill-cat-title">Security Operations</div>
+      <div class="skill-cat-title">👁️ Security Operations</div>
       <div class="skill-tags">
         <span class="tag sec">Wazuh SIEM</span>
-        <span class="tag sec">Active Respond</span>
-        <span class="tag sec">Rule Config</span>
+        <span class="tag sec">Active Response</span>
+        <span class="tag sec">Custom Rules</span>
+        <span class="tag sec">Threat Hunting</span>
         <span class="tag sec">Active Directory</span>
-        <span class="tag sec">OS Security</span>
       </div>
     </div>
-
     <div class="skill-cat">
-      <div class="skill-cat-title">Systems & Networks</div>
+      <div class="skill-cat-title">🧠 AI & Machine Learning</div>
       <div class="skill-tags">
-        <span class="tag net">Cisco Packet Tracer</span>
-        <span class="tag net">TCP/IP</span>
-        <span class="tag net">HTTP/HTTPS</span>
-        <span class="tag net">DNS / DHCP</span>
-        <span class="tag net">Assembly</span>
-        <span class="tag net">OS Internals</span>
+        <span class="tag ai">LLM Integration</span>
+        <span class="tag ai">RAG Pipeline</span>
+        <span class="tag ai">Prompt Eng.</span>
+        <span class="tag ai">Supervised ML</span>
+        <span class="tag ai">Python (AI/DS)</span>
       </div>
     </div>
-
     <div class="skill-cat">
-      <div class="skill-cat-title">Programming</div>
+      <div class="skill-cat-title">💻 Development</div>
       <div class="skill-tags">
         <span class="tag prog">Python</span>
-        <span class="tag java">Java / OOP</span>
+        <span class="tag java">Java / Spring Boot</span>
         <span class="tag prog">C++</span>
-        <span class="tag prog">Bash</span>
-        <span class="tag prog">SQL</span>
-        <span class="tag java">Spring Boot</span>
-      </div>
-    </div>
-
-    <div class="skill-cat">
-      <div class="skill-cat-title">AI / Machine Learning</div>
-      <div class="skill-tags">
-        <span class="tag ai">LLM</span>
-        <span class="tag ai">RAG</span>
-        <span class="tag ai">Supervised ML</span>
-        <span class="tag ai">Unsupervised ML</span>
-        <span class="tag ai">AI Algorithms</span>
-        <span class="tag ai">Prompt Eng.</span>
-      </div>
-    </div>
-
-    <div class="skill-cat">
-      <div class="skill-cat-title">Dev & Tools</div>
-      <div class="skill-tags">
-        <span class="tag sys">Git</span>
+        <span class="tag prog">Bash Scripting</span>
         <span class="tag sys">Docker</span>
         <span class="tag sys">REST API</span>
-        <span class="tag sys">Web Config</span>
-        <span class="tag sys">Linux Admin</span>
       </div>
     </div>
-
+    <div class="skill-cat">
+      <div class="skill-cat-title">🌐 Network & Infra</div>
+      <div class="skill-tags">
+        <span class="tag net">Cisco Packet Tracer</span>
+        <span class="tag net">TCP/IP Deep Dive</span>
+        <span class="tag net">HTTP/S Analysis</span>
+        <span class="tag net">Linux Admin</span>
+      </div>
+    </div>
   </div>
 </section>
 
-<hr class="divider">
+<hr style="border: 0; border-top: 1px solid var(--border); margin: 0;">
 
 <!-- PROJECTS -->
 <section id="projects">
-  <div class="section-label">Projects &amp; Research</div>
+  <div class="section-header">
+    <span class="section-label" data-i18n="sec_projects">Featured Projects</span>
+    <div class="section-line"></div>
+  </div>
   <div class="projects-grid">
-
+    
     <div class="proj">
       <div>
-        <div class="proj-name">🔐 SIEM Wazuh — Rule Config &amp; Active Response</div>
-        <div class="proj-desc">Triển khai và cấu hình hệ thống SIEM Wazuh, xây dựng custom detection rules, thiết lập active response tự động để phản ứng các mối đe dọa bảo mật theo thời gian thực.</div>
-        <div class="proj-stack">
-          <span class="tag sec">Wazuh</span>
-          <span class="tag sec">SIEM</span>
-          <span class="tag net">Linux</span>
-          <span class="tag prog">Bash</span>
-          <span class="tag sec">Threat Detection</span>
+        <div class="proj-name">🔐 SIEM Wazuh - Custom Detection</div>
+        <div class="proj-meta">
+          <span class="tag sec">Wazuh</span><span class="tag sec">SIEM</span>
+        </div>
+        <p class="proj-desc" data-i18n="proj_1_desc">Deployed Wazuh SIEM, built custom detection rules for specific attacks, and set up automated Active Response to isolate threats in real-time.</p>
+        <div class="proj-links">
+          <a href="#" class="proj-link" data-i18n="btn_report">📄 View Technical Report</a>
         </div>
       </div>
-      <div class="proj-year">2024</div>
+      <span class="proj-year">2024</span>
     </div>
 
     <div class="proj">
       <div>
-        <div class="proj-name">🏠 Hệ thống quản lý nhà trọ + LLM</div>
-        <div class="proj-desc">Web app quản lý phòng trọ, hợp đồng, thanh toán tích hợp LLM để hỗ trợ tra cứu và tự động hóa qua ngôn ngữ tự nhiên.</div>
-        <div class="proj-stack">
-          <span class="tag prog">Python</span>
-          <span class="tag ai">LLM</span>
-          <span class="tag ai">RAG</span>
-          <span class="tag sys">REST API</span>
+        <div class="proj-name">🏠 Smart Dormitory Management + LLM</div>
+        <div class="proj-meta">
+          <span class="tag prog">Python</span><span class="tag ai">RAG</span><span class="tag ai">LLM</span>
+        </div>
+        <p class="proj-desc" data-i18n="proj_2_desc">Room management system integrated with AI. Uses RAG to index contract/rental data, allowing landlords to ask questions in natural language and generate automated reports.</p>
+        <div class="proj-links">
+          <a href="#" class="proj-link" data-i18n="btn_demo">🔗 Live Demo</a>
+          <a href="#" class="proj-link" data-i18n="btn_code">📂 Source Code</a>
         </div>
       </div>
-      <div class="proj-year">2024</div>
+      <span class="proj-year">2024</span>
     </div>
 
     <div class="proj">
       <div>
-        <div class="proj-name">🚗 Web quản lý nhà xe — Spring Boot</div>
-        <div class="proj-desc">Ứng dụng web quản lý bãi đỗ xe xây dựng với Spring Boot, thiết kế RESTful API và giao diện người dùng, áp dụng kiến trúc MVC và OOP nghiêm chỉnh.</div>
-        <div class="proj-stack">
-          <span class="tag java">Spring Boot</span>
-          <span class="tag java">Java</span>
-          <span class="tag sys">REST API</span>
-          <span class="tag prog">SQL</span>
+        <div class="proj-name">🚗 Car Parking Management System</div>
+        <div class="proj-meta">
+          <span class="tag java">Spring Boot</span><span class="tag sys">REST API</span>
+        </div>
+        <p class="proj-desc" data-i18n="proj_3_desc">Built a backend API for parking management with Spring Boot. Applied MVC architecture, JWT security, and strict SQL transaction management.</p>
+        <div class="proj-links">
+          <a href="#" class="proj-link" data-i18n="btn_repo">📂 GitHub Repo</a>
         </div>
       </div>
-      <div class="proj-year">2024</div>
+      <span class="proj-year">2024</span>
     </div>
 
     <div class="proj">
       <div>
-        <div class="proj-name">🔬 Nghiên cứu DFS giới hạn năng lượng</div>
-        <div class="proj-desc">Nghiên cứu và hiện thực thuật toán DFS có ràng buộc năng lượng, phân tích độ phức tạp và ứng dụng trong bài toán tìm kiếm trạng thái có chi phí.</div>
-        <div class="proj-stack">
-          <span class="tag ai">AI Algorithms</span>
-          <span class="tag ai">Search</span>
-          <span class="tag prog">Python</span>
-          <span class="tag ai">Graph Theory</span>
+        <div class="proj-name">🔬 Energy-Constrained DFS Research</div>
+        <div class="proj-meta">
+          <span class="tag ai">Algorithms</span><span class="tag prog">Python</span>
+        </div>
+        <p class="proj-desc" data-i18n="proj_4_desc">Researched and implemented DFS with energy constraints. Analyzed complexity and applied it to optimal pathfinding problems for low-power devices.</p>
+        <div class="proj-links">
+          <a href="#" class="proj-link" data-i18n="btn_paper">📄 Research Paper</a>
         </div>
       </div>
-      <div class="proj-year">2023</div>
+      <span class="proj-year">2023</span>
     </div>
 
   </div>
 </section>
 
-<hr class="divider">
+<hr style="border: 0; border-top: 1px solid var(--border); margin: 0;">
 
 <!-- KNOWLEDGE -->
 <section id="knowledge">
-  <div class="section-label">Areas of Knowledge</div>
-  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:0.875rem;">
-
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;">
-      <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--ink3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.65rem;">Machine Learning</div>
-      <p style="font-size:0.845rem;color:var(--ink2);line-height:1.65;">Hiểu và áp dụng được các thuật toán phân loại học có giám sát (SVM, Decision Tree, KNN) và không giám sát (K-Means, DBSCAN) vào bài toán thực tế.</p>
+  <div class="section-header">
+    <span class="section-label" data-i18n="sec_knowledge">Deep Knowledge</span>
+    <div class="section-line"></div>
+  </div>
+  <div class="knowledge-grid">
+    <div class="k-card">
+      <div class="k-title" data-i18n="know_1_title">Machine Learning & AI</div>
+      <div class="k-desc" data-i18n="know_1_desc">Deep understanding of Supervised (SVM, Decision Tree) and Unsupervised (K-Means) algorithms. Integrating LLMs to optimize security research workflows.</div>
     </div>
-
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;">
-      <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--ink3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.65rem;">OS &amp; Low-level Security</div>
-      <p style="font-size:0.845rem;color:var(--ink2);line-height:1.65;">Hiểu sâu cơ chế hệ điều hành, an toàn OS, đọc và phân tích mã Assembly — nền tảng cho reverse engineering và binary exploitation.</p>
+    <div class="k-card">
+      <div class="k-title" data-i18n="know_2_title">OS Internals & Low-level</div>
+      <div class="k-desc" data-i18n="know_2_desc">Solid grasp of OS memory/process management. Ability to read and analyze Assembly code — the foundation for Reverse Engineering.</div>
     </div>
-
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;">
-      <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--ink3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.65rem;">Network &amp; Infrastructure</div>
-      <p style="font-size:0.845rem;color:var(--ink2);line-height:1.65;">Cấu hình mạng Cisco, hiểu rõ giao thức TCP/IP, HTTP/S, DNS, DHCP. Cấu hình Active Directory và web protocols trong môi trường doanh nghiệp.</p>
+    <div class="k-card">
+      <div class="k-title" data-i18n="know_3_title">Network Infrastructure</div>
+      <div class="k-desc" data-i18n="know_3_desc">Configuring complex networks with Cisco. Deep understanding of TCP/IP, HTTP/S protocols, and exploiting vulnerabilities at Application & Network layers.</div>
     </div>
-
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;">
-      <div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--ink3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.65rem;">AI-assisted Workflow</div>
-      <p style="font-size:0.845rem;color:var(--ink2);line-height:1.65;">Biết khai thác AI (LLM) đúng cách và hiệu quả trong nghiên cứu, lập trình và phân tích bảo mật — prompt engineering và RAG pipeline.</p>
-    </div>
-
   </div>
 </section>
 
-<hr class="divider">
+<hr style="border: 0; border-top: 1px solid var(--border); margin: 0;">
 
 <!-- CERTS -->
 <section id="certs">
-  <div class="section-label">Certifications</div>
+  <div class="section-header">
+    <span class="section-label" data-i18n="sec_certs">Certifications</span>
+    <div class="section-line"></div>
+  </div>
   <div class="cert-list">
     <div class="cert-card">
       <div class="cert-icon">🎯</div>
-      <div>
-        <div class="cert-name">eJPT — eLearnSecurity Junior Penetration Tester</div>
+      <div class="cert-info">
+        <div class="cert-name">eJPT (Junior Penetration Tester)</div>
         <div class="cert-sub">INE Security</div>
       </div>
-      <span class="cert-status">In progress</span>
+      <span class="cert-badge status-progress" data-i18n="status_progress">In Progress</span>
     </div>
     <div class="cert-card">
       <div class="cert-icon">🔐</div>
-      <div>
+      <div class="cert-info">
         <div class="cert-name">CompTIA Security+</div>
         <div class="cert-sub">CompTIA</div>
       </div>
-      <span class="cert-status">Planned</span>
+      <span class="cert-badge status-planned" data-i18n="status_planned">Planned</span>
     </div>
     <div class="cert-card">
       <div class="cert-icon">🤖</div>
-      <div>
+      <div class="cert-info">
         <div class="cert-name">Google AI Essentials</div>
         <div class="cert-sub">Google / Coursera</div>
       </div>
-      <span class="cert-status">Planned</span>
+      <span class="cert-badge status-planned" data-i18n="status_planned">Planned</span>
     </div>
   </div>
-  <p style="font-size:12px;color:var(--ink3);margin-top:0.75rem;">* Sẽ cập nhật khi có chứng chỉ mới</p>
 </section>
-
-<hr class="divider">
 
 <!-- CONTACT -->
 <section id="contact">
-  <div class="section-label">Contact</div>
+  <div class="section-header">
+    <span class="section-label" data-i18n="sec_contact">Get In Touch</span>
+    <div class="section-line"></div>
+  </div>
   <div class="contact-grid">
     <a href="mailto:egoisticuss@gmail.com" class="contact-item">
-      <span class="contact-icon">✉</span>
-      <div><div class="contact-label">Email</div><div class="contact-val">egoisticuss@gmail.com</div></div>
+      <div class="c-icon">✉️</div>
+      <div class="c-data"><h4>Email</h4><p>egoisticuss@gmail.com</p></div>
     </a>
     <a href="https://github.com/TrNguyeen-et" target="_blank" class="contact-item">
-      <span class="contact-icon">⌥</span>
-      <div><div class="contact-label">GitHub</div><div class="contact-val">TrNguyeen-et</div></div>
+      <div class="c-icon">⌘</div>
+      <div class="c-data"><h4>GitHub</h4><p>TrNguyeen-et</p></div>
     </a>
     <a href="https://linkedin.com/in/nguyenVuongTruong" target="_blank" class="contact-item">
-      <span class="contact-icon">in</span>
-      <div><div class="contact-label">LinkedIn</div><div class="contact-val">Nguyên Vương Trường</div></div>
+      <div class="c-icon">🔗</div>
+      <div class="c-data"><h4>LinkedIn</h4><p>Vương Trường Nguyên</p></div>
     </a>
     <div class="contact-item">
-      <span class="contact-icon">📍</span>
-      <div><div class="contact-label">Location</div><div class="contact-val">Ho Chi Minh City, VN</div></div>
+      <div class="c-icon">📍</div>
+      <div class="c-data"><h4>Location</h4><p>Ho Chi Minh City, VN</p></div>
     </div>
   </div>
 </section>
 
-<div style="max-width:860px;margin:0 auto;padding:1rem 2rem 3rem;text-align:center;">
-  <p style="font-size:12px;color:var(--ink3);font-family:'DM Mono',monospace;">© 2025 Vương Trường Nguyên · Security &amp; AI Engineering</p>
-</div>
+<footer>
+  <p data-i18n="footer">© 2025 Vương Trường Nguyên. Designed & Built with Code.</p>
+</footer>
 
 <!-- AI CHATBOT -->
 <div id="chatbot">
-  <div class="chat-window" id="chatWindow">
-    <div class="chat-header">
-      <div class="chat-header-dot"></div>
-      <div>
-        <div class="chat-header-name">Chat với AI về Nguyên</div>
-        <div class="chat-header-sub">Powered by Claude</div>
+  <div class="chat-box" id="chatBox">
+    <div class="chat-head">
+      <div class="chat-avatar">🤖</div>
+      <div class="chat-info">
+        <h3>Nguyên's AI Assistant</h3>
+        <span data-i18n="bot_subtitle">Powered by Local Logic</span>
       </div>
     </div>
-    <div class="chat-messages" id="chatMessages">
-      <div class="msg bot">Xin chào! Tôi là AI của Nguyên 👋 Bạn muốn biết gì về anh ấy?</div>
+    <div class="chat-body" id="chatBody">
+      <div class="msg bot" id="bot_greeting">Hello! I am the AI assistant on Nguyên's portfolio. Want to know about his skills, projects, or work experience?</div>
     </div>
-    <div class="quick-chips" id="quickChips">
-      <button class="chip" onclick="sendChip(this,'Nguyên có kinh nghiệm gì về bảo mật?')">Kinh nghiệm security?</button>
-      <button class="chip" onclick="sendChip(this,'Các project nổi bật của Nguyên?')">Projects?</button>
-      <button class="chip" onclick="sendChip(this,'Nguyên đang tìm vị trí intern gì?')">Tìm việc gì?</button>
+    <div class="chat-actions" id="chatActions">
+      <button class="chip" onclick="sendQuick('sec')" data-i18n="chip_sec">Security Skills</button>
+      <button class="chip" onclick="sendQuick('proj')" data-i18n="chip_proj">Projects</button>
+      <button class="chip" onclick="sendQuick('hire')" data-i18n="chip_hire">Hiring</button>
     </div>
-    <div class="chat-input-row">
-      <input type="text" id="chatInput" class="chat-input" placeholder="Hỏi về Nguyên..." />
-      <button class="chat-send" onclick="sendMsg()">➤</button>
+    <div class="chat-input-area">
+      <input type="text" id="chatInput" class="chat-input" data-i18n-placeholder="ph_ask" placeholder="Ask something..." onkeypress="handleEnter(event)">
+      <button class="chat-send" onclick="sendMessage()">➤</button>
     </div>
   </div>
-  <button class="chat-bubble-btn" onclick="toggleChat()">💬</button>
+  <button class="chat-toggle" onclick="toggleChat()">💬</button>
 </div>
 
 <script>
-const PROFILE = `Bạn là AI assistant của Vương Trường Nguyên (Nguyên), sinh viên An toàn thông tin tại PTIT, TP.HCM.
+  /* --- STATE MANAGEMENT --- */
+  let currentLang = 'en'; // Default to English
+  let isDarkMode = false;
 
-THÔNG TIN:
-- Email: egoisticuss@gmail.com | GitHub: TrNguyeen-et
-- Tìm kiếm: Intern/Fresher Pentester hoặc AI Engineer
+  /* --- TRANSLATIONS --- */
+  const translations = {
+    en: {
+      nav_skills: "Skills", nav_projects: "Projects", nav_knowledge: "Knowledge", nav_certs: "Certs", nav_contact: "Contact",
+      hero_badge: "Available for Internship/Fresher",
+      hero_greeting: 'Hi, I\'m <span style="color: var(--accent);">Nguyên</span>.<br><span class="typing-text" id="typewriter"></span>',
+      hero_desc: 'Information Security Student at PTIT (HCM). I combine <strong>Penetration Testing</strong> with <strong>Artificial Intelligence</strong> to build smart and efficient security solutions.',
+      btn_github: "GitHub Profile ↗", btn_contact: "Contact Me",
+      sec_skills: "Technical Arsenal", sec_projects: "Featured Projects", sec_knowledge: "Deep Knowledge", sec_certs: "Certifications", sec_contact: "Get In Touch",
+      proj_1_desc: "Deployed Wazuh SIEM, built custom detection rules for specific attacks, and set up automated Active Response to isolate threats in real-time.",
+      proj_2_desc: "Room management system integrated with AI. Uses RAG to index contract/rental data, allowing landlords to ask questions in natural language and generate automated reports.",
+      proj_3_desc: "Built a backend API for parking management with Spring Boot. Applied MVC architecture, JWT security, and strict SQL transaction management.",
+      proj_4_desc: "Researched and implemented DFS with energy constraints. Analyzed complexity and applied it to optimal pathfinding problems for low-power devices.",
+      btn_report: "📄 View Technical Report", btn_demo: "🔗 Live Demo", btn_code: "📂 Source Code", btn_repo: "📂 GitHub Repo", btn_paper: "📄 Research Paper",
+      know_1_title: "Machine Learning & AI", know_1_desc: "Deep understanding of Supervised (SVM, Decision Tree) and Unsupervised (K-Means) algorithms. Integrating LLMs to optimize security research workflows.",
+      know_2_title: "OS Internals & Low-level", know_2_desc: "Solid grasp of OS memory/process management. Ability to read and analyze Assembly code — the foundation for Reverse Engineering.",
+      know_3_title: "Network Infrastructure", know_3_desc: "Configuring complex networks with Cisco. Deep understanding of TCP/IP, HTTP/S protocols, and exploiting vulnerabilities at Application & Network layers.",
+      status_progress: "In Progress", status_planned: "Planned",
+      footer: "© 2025 Vương Trường Nguyên. Designed & Built with Code.",
+      bot_subtitle: "Powered by Local Logic",
+      chip_sec: "Security Skills", chip_proj: "Projects", chip_hire: "Hiring",
+      ph_ask: "Ask something..."
+    },
+    vi: {
+      nav_skills: "Kỹ năng", nav_projects: "Dự án", nav_knowledge: "Kiến thức", nav_certs: "Chứng chỉ", nav_contact: "Liên hệ",
+      hero_badge: "Tìm kiếm Intern/Fresher",
+      hero_greeting: 'Xin chào, tôi là <span style="color: var(--accent);">Nguyên</span>.<br><span class="typing-text" id="typewriter"></span>',
+      hero_desc: 'Sinh viên An toàn thông tin tại PTIT (TP.HCM). Tôi kết hợp <strong>Penetration Testing</strong> với <strong>Artificial Intelligence</strong> để xây dựng các giải pháp bảo mật thông minh và hiệu quả.',
+      btn_github: "Hồ sơ GitHub ↗", btn_contact: "Liên hệ ngay",
+      sec_skills: "Kho Vũ Khí Kỹ Thuật", sec_projects: "Dự Án Nổi Bật", sec_knowledge: "Kiến Thức Sâu", sec_certs: "Chứng Chỉ", sec_contact: "Kết Nối",
+      proj_1_desc: "Triển khai hệ thống SIEM Wazuh, xây dựng các custom detection rules cho các cuộc tấn công cụ thể và thiết lập Active Response tự động để cách ly mối đe dọa theo thời gian thực.",
+      proj_2_desc: "Hệ thống quản lý phòng trọ tích hợp AI. Sử dụng RAG để index dữ liệu hợp đồng/thuê phòng, cho phép chủ trỏ hỏi đáp bằng ngôn ngữ tự nhiên và xuất báo cáo tự động.",
+      proj_3_desc: "Xây dựng backend API quản lý bãi đỗ xe với Spring Boot. Áp dụng kiến trúc MVC, bảo mật JWT và quản lý giao dịch cơ sở dữ liệu SQL một cách chặt chẽ.",
+      proj_4_desc: "Nghiên cứu và hiện thực thuật toán DFS có ràng buộc năng lượng. Phân tích độ phức tạp và ứng dụng trong bài toán tìm kiếm đường đi tối ưu cho thiết bị pin yếu.",
+      btn_report: "📄 Xem Báo Cáo", btn_demo: "🔗 Live Demo", btn_code: "📂 Mã Nguồn", btn_repo: "📂 GitHub Repo", btn_paper: "📄 Bài Nghiên Cứu",
+      know_1_title: "Machine Learning & AI", know_1_desc: "Hiểu sâu các thuật toán Supervised (SVM, Decision Tree) và Unsupervised (K-Means). Kết hợp LLM để tối ưu hóa workflow nghiên cứu bảo mật.",
+      know_2_title: "OS Internals & Low-level", know_2_desc: "Nắm vững cơ chế quản lý bộ nhớ, process của OS. Khả năng đọc và phân tích mã Assembly - nền tảng cho Reverse Engineering.",
+      know_3_title: "Network Infrastructure", know_3_desc: "Cấu hình mạng phức tạp với Cisco, hiểu rõ sâu sắc các giao thức TCP/IP, HTTP/S và cách khai thác lỗ hổng ở tầng Application & Network.",
+      status_progress: "Đang làm", status_planned: "Kế hoạch",
+      footer: "© 2025 Vương Trường Nguyên. Thiết kế & Lập trình bằng Code.",
+      bot_subtitle: "Hoạt động bằng Logic cục bộ",
+      chip_sec: "Kỹ năng Security", chip_proj: "Dự án", chip_hire: "Tuyển dụng",
+      ph_ask: "Hỏi gì đó..."
+    }
+  };
 
-ĐỊNH HƯỚNG: Penetration Testing + ứng dụng AI trong Cybersecurity (AI-powered security tools, LLM + security automation)
-
-KỸ NĂNG:
-- Pentesting: Kali Linux, Burp Suite, Metasploit, Nmap, Wireshark, OWASP Top 10
-- Security Ops: Wazuh SIEM, custom rules, active response, Active Directory
-- Hệ thống: Hiểu sâu OS internals, an toàn hệ điều hành, đọc Assembly, reverse engineering cơ bản
-- Mạng: Cisco Packet Tracer, TCP/IP, HTTP/S, DNS, DHCP, cấu hình web protocols
-- Lập trình: Python, Java (OOP, Swing/GUI), Spring Boot, C++, Bash, SQL
-- AI/ML: LLM, RAG, LangChain, thuật toán AI cơ bản (DFS, BFS, A*), Supervised ML (SVM, KNN, Decision Tree), Unsupervised ML (K-Means, DBSCAN)
-- Biết sử dụng AI đúng cách trong workflow lập trình và nghiên cứu
-
-DỰ ÁN:
-1. SIEM Wazuh: cấu hình rules + active response cho threat detection real-time
-2. Nhà trọ thông minh: web app + tích hợp LLM/RAG (Python)
-3. Quản lý nhà xe: Spring Boot + Java + REST API + SQL
-4. Nghiên cứu DFS giới hạn năng lượng: thuật toán tìm kiếm có ràng buộc
-
-Trả lời ngắn gọn, thân thiện bằng tiếng Việt. Thông tin không có → gợi ý liên hệ email.`;
-
-let chatOpen = false;
-function toggleChat() {
-  chatOpen = !chatOpen;
-  document.getElementById('chatWindow').classList.toggle('open', chatOpen);
-}
-function sendChip(el, text) {
-  document.getElementById('chatInput').value = text;
-  el.closest('.quick-chips').style.display = 'none';
-  sendMsg();
-}
-async function sendMsg() {
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = '';
-  const msgs = document.getElementById('chatMessages');
-  msgs.innerHTML += `<div class="msg user">${text}</div>`;
-  const typingId = 'typing_' + Date.now();
-  msgs.innerHTML += `<div class="msg bot" id="${typingId}" style="opacity:0.6;font-style:italic;">Đang suy nghĩ...</div>`;
-  msgs.scrollTop = msgs.scrollHeight;
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: PROFILE,
-        messages: [{ role: 'user', content: text }]
-      })
-    });
-    const data = await res.json();
-    const reply = data.content?.[0]?.text || 'Xin lỗi, có lỗi xảy ra!';
-    document.getElementById(typingId).outerHTML = `<div class="msg bot">${reply}</div>`;
-  } catch {
-    document.getElementById(typingId).outerHTML = `<div class="msg bot">Xin lỗi, lỗi kết nối!</div>`;
+  /* --- LOGIC: THEME & LANG --- */
+  function toggleTheme() {
+    isDarkMode = !isDarkMode;
+    document.body.classList.toggle('dark-mode', isDarkMode);
+    const btn = document.getElementById('themeBtn');
+    btn.innerHTML = isDarkMode ? '<span id="themeIcon">☀️</span>' : '<span id="themeIcon">🌙</span>';
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
   }
-  msgs.scrollTop = msgs.scrollHeight;
-}
-document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendMsg(); });
+
+  function toggleLanguage() {
+    currentLang = currentLang === 'en' ? 'vi' : 'en';
+    updateContent();
+    const btn = document.getElementById('langBtn');
+    const icon = document.getElementById('langIcon');
+    const text = document.getElementById('langText');
+    
+    if (currentLang === 'en') {
+      icon.textContent = '🇺🇸'; text.textContent = 'EN';
+    } else {
+      icon.textContent = '🇻🇳'; text.textContent = 'VN';
+    }
+  }
+
+  function updateContent() {
+    const elements = document.querySelectorAll('[data-i18n]');
+    elements.forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (translations[currentLang][key]) {
+        el.innerHTML = translations[currentLang][key];
+      }
+    });
+
+    // Update Placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+       const key = el.getAttribute('data-i18n-placeholder');
+       if (translations[currentLang][key]) el.placeholder = translations[currentLang][key];
+    });
+
+    // Reset Typewriter
+    resetTypewriter();
+    // Update Chatbot Greeting
+    document.getElementById('bot_greeting').innerText = currentLang === 'en' 
+      ? "Hello! I am the AI assistant on Nguyên's portfolio. Want to know about his skills, projects, or work experience?"
+      : "Xin chào! Tôi là AI hỗ trợ trên portfolio của Nguyên. Bạn muốn biết về kỹ năng, dự án hay kinh nghiệm làm việc?";
+  }
+
+  /* --- TYPEWRITER EFFECT --- */
+  const roles = {
+    en: ["Security Engineer", "AI Researcher", "Pentester"],
+    vi: ["Kỹ sư Bảo mật", "Nghiên cứu AI", "Pentester"]
+  };
+  
+  let roleIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+  let typeTimeout;
+
+  function typeWriter() {
+    const currentRoles = roles[currentLang];
+    const currentRole = currentRoles[roleIndex];
+    const typewriterElement = document.getElementById("typewriter");
+    
+    if (!typewriterElement) return;
+
+    if (isDeleting) {
+      typewriterElement.textContent = currentRole.substring(0, charIndex - 1);
+      charIndex--;
+    } else {
+      typewriterElement.textContent = currentRole.substring(0, charIndex + 1);
+      charIndex++;
+    }
+
+    let speed = isDeleting ? 50 : 100;
+
+    if (!isDeleting && charIndex === currentRole.length) {
+      isDeleting = true;
+      speed = 2000;
+    } else if (isDeleting && charIndex === 0) {
+      isDeleting = false;
+      roleIndex = (roleIndex + 1) % currentRoles.length;
+      speed = 500;
+    }
+
+    typeTimeout = setTimeout(typeWriter, speed);
+  }
+
+  function resetTypewriter() {
+    clearTimeout(typeTimeout);
+    roleIndex = 0;
+    charIndex = 0;
+    isDeleting = false;
+    typeWriter();
+  }
+
+  /* --- CHATBOT LOGIC (MULTI-LANG) --- */
+  function toggleChat() {
+    document.getElementById('chatBox').classList.toggle('active');
+  }
+
+  function handleEnter(e) {
+    if(e.key === 'Enter') sendMessage();
+  }
+
+  function sendQuick(type) {
+    let text = "";
+    if (currentLang === 'en') {
+      if (type === 'sec') text = "Security skills?";
+      if (type === 'proj') text = "Featured projects?";
+      if (type === 'hire') text = "Contact for hiring?";
+    } else {
+      if (type === 'sec') text = "Kỹ năng bảo mật?";
+      if (type === 'proj') text = "Dự án nổi bật?";
+      if (type === 'hire') text = "Liên hệ tuyển dụng?";
+    }
+    
+    document.getElementById('chatInput').value = text;
+    sendMessage();
+    document.getElementById('chatActions').style.display = 'none'; 
+  }
+
+  function addMessage(text, sender) {
+    const body = document.getElementById('chatBody');
+    const div = document.createElement('div');
+    div.className = `msg ${sender}`;
+    div.textContent = text;
+    body.appendChild(div);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if(!text) return;
+
+    addMessage(text, 'user');
+    input.value = '';
+
+    setTimeout(() => {
+      let reply = "";
+      const lower = text.toLowerCase();
+      const isEn = currentLang === 'en';
+
+      // English Logic
+      if (isEn) {
+        if(lower.includes('sec') || lower.includes('skill') || lower.includes('hack')) {
+          reply = "Nguyên has a strong foundation in Pentesting (Kali, Burp Suite), OS internals and Networking. He specifically combines AI with Security Operations (Wazuh SIEM).";
+        } else if(lower.includes('proj') || lower.includes('code')) {
+          reply = "His top projects include a Custom Wazuh SIEM setup and a Smart Dormitory system using LLM/RAG. You can view details in the Projects section above.";
+        } else if(lower.includes('hire') || lower.includes('email') || lower.includes('job')) {
+          reply = "Nguyên is looking for Intern/Fresher opportunities. You can email him at egoisticuss@gmail.com or connect on LinkedIn!";
+        } else if(lower.includes('ai') || lower.includes('llm')) {
+          reply = "Nguyên applies AI mainly for RAG Pipelines, Prompt Engineering and log security analysis. He also knows basic ML algorithms.";
+        } else {
+          reply = "Good question! I'm just a demo AI bot on this static site. For detailed answers, please email Nguyên directly.";
+        }
+      } 
+      // Vietnamese Logic
+      else {
+        if(lower.includes('bảo mật') || lower.includes('skill') || lower.includes('sec')) {
+          reply = "Nguyên có nền tảng vững về Pentesting (Kali, Burp Suite), OS internals và Network. Đặc biệt là việc kết hợp AI vào Security operations (Wazuh SIEM).";
+        } else if(lower.includes('dự án') || lower.includes('proj')) {
+          reply = "Dự án nổi bật nhất của Nguyên là hệ thống SIEM Wazuh tùy chỉnh và Smart Dormitory tích hợp LLM/RAG. Bạn có thể xem chi tiết ở section Projects bên trên.";
+        } else if(lower.includes('liên hệ') || lower.includes('email') || lower.includes('tuyển')) {
+          reply = "Nguyên đang tìm kiếm cơ hội Intern/Fresher. Bạn có thể gửi email về egoisticuss@gmail.com hoặc kết nối LinkedIn ngay nhé!";
+        } else if(lower.includes('ai') || lower.includes('llm')) {
+          reply = "Nguyên áp dụng AI chủ yếu vào RAG Pipeline, Prompt Engineering và phân tích log bảo mật. Anh ấy cũng biết các thuật toán ML cơ bản.";
+        } else {
+          reply = "Câu hỏi hay! Tôi chỉ là AI demo trên trang web tĩnh này. Để biết chi tiết hơn, bạn nên email trực tiếp cho Nguyên nhé.";
+        }
+      }
+      addMessage(reply, 'bot');
+    }, 600);
+  }
+
+  /* --- INIT --- */
+  // Load saved theme
+  if(localStorage.getItem('theme') === 'dark') {
+    toggleTheme(); // This will set isDarkMode to true
+  }
+  
+  // Start Typewriter
+  document.addEventListener('DOMContentLoaded', () => {
+    resetTypewriter();
+  });
+
 </script>
+
 </body>
 </html>
